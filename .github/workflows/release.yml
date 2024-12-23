@@ -116,35 +116,67 @@ jobs:
 #          xcode-select --install
 
       # Step 3: Ensure Xcode Command Line Tools are installed (if necessary)
-      - name: Ensure Xcode Command Line Tools are installed
-        if: matrix.platform == 'ios' && runner.os == 'macOS'
-        run: |
-          if ! xcode-select -p &>/dev/null; then
-            echo "Xcode Command Line Tools are not installed. Installing..."
-            xcode-select --install || true  # Ignore errors if tools are already installed
-          else
-            echo "Xcode Command Line Tools are already installed."
-          fi
-          # Check and accept Xcode license (necessary on fresh machines)
-          sudo xcodebuild -license accept
+#      - name: Ensure Xcode Command Line Tools are installed
+#        if: matrix.platform == 'ios' && runner.os == 'macOS'
+#        run: |
+#          if ! xcode-select -p &>/dev/null; then
+#            echo "Xcode Command Line Tools are not installed. Installing..."
+#            xcode-select --install || true  # Ignore errors if tools are already installed
+#          else
+#            echo "Xcode Command Line Tools are already installed."
+#          fi
+#          # Check and accept Xcode license (necessary on fresh machines)
+#          sudo xcodebuild -license accept
 
       # Step 4: Install CocoaPods dependencies (only if cache is not hit)
-      - name: Install CocoaPods dependencies
-        if: matrix.platform == 'ios'
+#      - name: Install CocoaPods dependencies
+#        if: matrix.platform == 'ios'
+#        run: |
+#          # Install CocoaPods if not already installed
+#          gem install cocoapods --user-install
+#          export PATH="$HOME/.gem/ruby/3.2.0/bin:$PATH"  # Add gem path to $PATH
+#
+#          # Ensure Flutter dependencies are fetched
+#          flutter pub get  # Ensure Flutter dependencies are fetched, including the Generated.xcconfig file
+#
+#          # Update Podfile for higher platform version if necessary
+#          if ! grep -q "platform :ios, '11.0'" ios/Podfile; then
+#            sed -i '' "s/platform :ios, '10.0'/platform :ios, '11.0'/" ios/Podfile
+#          fi
+#
+#          # Install iOS dependencies with pod
+#          pod install --repo-update --project-directory=ios  # Run pod install after flutter pub get
+
+
+      # Step 3: Install Xcode 16.1 (manually setting the Xcode version)
+      - name: Set up Xcode 16.1
         run: |
-          # Install CocoaPods if not already installed
-          gem install cocoapods --user-install
+          sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
+          sudo xcodebuild -runFirstLaunch  # Initialize Xcode
+          sudo xcodebuild -license accept  # Accept Xcode license agreement
+
+      # Step 4: Install CocoaPods version 1.15.2
+      - name: Install CocoaPods 1.15.2
+        run: |
+          gem install cocoapods -v 1.15.2 --user-install
           export PATH="$HOME/.gem/ruby/3.2.0/bin:$PATH"  # Add gem path to $PATH
-          
-          # Ensure Flutter dependencies are fetched
+
+      # Step 5: Ensure Flutter dependencies are fetched
+      - name: Flutter pub get
+        run: |
           flutter pub get  # Ensure Flutter dependencies are fetched, including the Generated.xcconfig file
-          
-          # Update Podfile for higher platform version if necessary
+
+      # Step 6: Update Podfile for iOS platform version 11.0
+      - name: Update Podfile for iOS platform version 11.0
+        run: |
+          # Update the Podfile to ensure it's using iOS 11.0 as minimum platform version
           if ! grep -q "platform :ios, '11.0'" ios/Podfile; then
-            sed -i '' "s/platform :ios, '10.0'/platform :ios, '11.0'/" ios/Podfile
+            sed -i '' "s/platform :ios, '[0-9]*\.[0-9]*'/platform :ios, '11.0'/" ios/Podfile
           fi
-          
-          # Install iOS dependencies with pod
+
+      # Step 7: Install iOS dependencies with CocoaPods
+      - name: Install CocoaPods dependencies
+        run: |
           pod install --repo-update --project-directory=ios  # Run pod install after flutter pub get
 
       # Step 5: flutter project clean
