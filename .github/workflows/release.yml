@@ -178,9 +178,9 @@ jobs:
           cat ios/Podfile
 
       # Step 7: Install iOS dependencies with CocoaPods
-      - name: Install CocoaPods dependencies
-        run: |
-          pod install --repo-update --project-directory=ios  # Run pod install after flutter pub get
+#      - name: Install CocoaPods dependencies
+#        run: |
+#          pod install --repo-update --project-directory=ios  # Run pod install after flutter pub get
 
       # Step 5: flutter project clean
       - name: Clean project
