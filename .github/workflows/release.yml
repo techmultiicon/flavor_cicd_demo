@@ -162,9 +162,9 @@ jobs:
           export PATH="$HOME/.gem/ruby/3.2.0/bin:$PATH"  # Add gem path to $PATH
 
       # Step 5: Ensure Flutter dependencies are fetched
-      - name: Flutter pub get
-        run: |
-          flutter pub get  # Ensure Flutter dependencies are fetched, including the Generated.xcconfig file
+#      - name: Flutter pub get
+#        run: |
+#          flutter pub get  # Ensure Flutter dependencies are fetched, including the Generated.xcconfig file
 
       # Step 5: Update Podfile for iOS platform version
       - name: Update Podfile for iOS platform version 11.0
@@ -180,12 +180,6 @@ jobs:
           
           # Debug: Print the Podfile content after modification
           cat ios/Podfile
-
-      # Step 6: Install CocoaPods dependencies
-      - name: Install CocoaPods dependencies
-        run: |
-          cd ios
-          pod install --repo-update
 
       # Step 5: flutter project clean
       - name: Clean project
@@ -207,6 +201,12 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           flutter pub get  # Get Flutter project dependencies
+
+      # Step 6: Install CocoaPods dependencies
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios
+          pod install --repo-update
 
       # Build iOS app with flavor
       - name: Build iOS app with flavor sandbox
