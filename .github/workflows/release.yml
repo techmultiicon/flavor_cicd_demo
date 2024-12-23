@@ -51,7 +51,7 @@ jobs:
     strategy:
       matrix:
         flavor: ${{ fromJson(needs.parse.outputs.flavors) }}
-        platform: [android, ios]
+        platform: [ios]
       fail-fast: false
     steps:
       # Step 1: Checkout the repository code
@@ -128,23 +128,24 @@ jobs:
           # Check and accept Xcode license (necessary on fresh machines)
           sudo xcodebuild -license accept
 
-      # Install CocoaPods dependencies (only if cache is not hit)
+      # Step 4: Install CocoaPods dependencies (only if cache is not hit)
       - name: Install CocoaPods dependencies
         if: matrix.platform == 'ios'
         run: |
+          # Install CocoaPods if not already installed
           gem install cocoapods --user-install
           export PATH="$HOME/.gem/ruby/3.2.0/bin:$PATH"  # Add gem path to $PATH
-            
+          
+          # Ensure Flutter dependencies are fetched
           flutter pub get  # Ensure Flutter dependencies are fetched, including the Generated.xcconfig file
-            
-          # Specify iOS platform version in Podfile
-          echo "platform :ios, '10.0'" >> ios/Podfile  # Set platform version to 10.0 or higher
-            
-          pod install --project-directory=ios  # Run pod install after flutter pub get
-        env:
-          FLUTTER_ROOT: /Users/runner/hostedtoolcache/flutter/stable-3.24.1-arm64
-          PUB_CACHE: /Users/runner/.pub-cache
-          JAVA_HOME: /Users/runner/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.13-11/x64/Contents/Home
+          
+          # Update Podfile for higher platform version if necessary
+          if ! grep -q "platform :ios, '11.0'" ios/Podfile; then
+            sed -i '' "s/platform :ios, '10.0'/platform :ios, '11.0'/" ios/Podfile
+          fi
+          
+          # Install iOS dependencies with pod
+          pod install --repo-update --project-directory=ios  # Run pod install after flutter pub get
 
       # Step 5: flutter project clean
       - name: Clean project
