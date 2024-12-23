@@ -169,9 +169,17 @@ jobs:
       # Step 5: Update Podfile for iOS platform version
       - name: Update Podfile for iOS platform version 11.0
         run: |
-          if ! grep -q "platform :ios, '11.0'" ios/Podfile; then
-            sed -i '' "s/platform :ios, '[0-9]*\.[0-9]*'/platform :ios, '11.0'/" ios/Podfile
+          # Check if the Podfile contains a platform :ios line
+          if grep -q "platform :ios" ios/Podfile; then
+            # Replace the existing platform line with iOS 11.0
+            sed -i '' "s/platform :ios, '[^']*'/platform :ios, '11.0'/" ios/Podfile
+          else
+            # If not present, add platform line at the top of the Podfile
+            sed -i '' "1i\platform :ios, '11.0'" ios/Podfile
           fi
+          
+          # Debug: Print the Podfile content after modification
+          cat ios/Podfile
 
       # Step 6: Install CocoaPods dependencies
       - name: Install CocoaPods dependencies
