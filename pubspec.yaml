@@ -98,20 +98,35 @@ flutter_flavor:
       android:
         name: "SandBox"
         applicationId: "com.sandbox"
+      ios:
+        name: "SandBox"
+        bundleId: "com.sandbox"
     production:
       android:
         name: "Production"
         applicationId: "production.app.com"
+      ios:
+        name: "Production"
+        bundleId: "production.app.com"
     development:
       android:
         name: "Development"
         applicationId: "development.com"
+      ios:
+        name: "Development"
+        bundleId: "development.com"
     staging:
       android:
         name: "Staging"
         applicationId: "com.app.staging"
+      ios:
+        name: "Staging"
+        bundleId: "com.app.staging"
     environment:
       android:
         name: "Environment"
         applicationId: "com.environment"
+      ios:
+        name: "Environment"
+        bundleId: "com.environment"
 
