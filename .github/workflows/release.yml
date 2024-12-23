@@ -110,10 +110,23 @@ jobs:
 #            ${{ runner.os }}-cocoapods-
 
       # Install Xcode Command Line Tools
-      - name: Install Xcode Command Line Tools
+#      - name: Install Xcode Command Line Tools
+#        if: matrix.platform == 'ios' && runner.os == 'macOS'
+#        run: |
+#          xcode-select --install
+
+      # Step 3: Ensure Xcode Command Line Tools are installed (if necessary)
+      - name: Ensure Xcode Command Line Tools are installed
         if: matrix.platform == 'ios' && runner.os == 'macOS'
         run: |
-          xcode-select --install
+          if ! xcode-select -p &>/dev/null; then
+            echo "Xcode Command Line Tools are not installed. Installing..."
+            xcode-select --install || true  # Ignore errors if tools are already installed
+          else
+            echo "Xcode Command Line Tools are already installed."
+          fi
+          # Check and accept Xcode license (necessary on fresh machines)
+          sudo xcodebuild -license accept
 
       # Install CocoaPods dependencies (only if cache is not hit)
       - name: Install CocoaPods dependencies
@@ -204,31 +217,19 @@ jobs:
                     --build-number=$BUILD_NUMBER
               else
                 echo "Skipping iOS build for flavor $FLAVOR due to condition mismatch."
-              fi
-          
-              if [[ "${{ matrix.platform }}" == "android" ]]; then
-                  echo "Running Android build for flavor: $FLAVOR"
-                  flutter build apk \
-                    --flavor $FLAVOR \
-                    --target=$ENTRY_POINT \
-                    --release \
-                    --build-name=$VERSION \
-                    --build-number=$BUILD_NUMBER
-              else
-                echo "Skipping iOS build for flavor $FLAVOR due to condition mismatch."
-              fi           
+              fi          
               echo "Successfully built APK and AAB for $FLAVOR"
           else
             echo "Skipping build for flavor $FLAVOR because is_upload is false."
           fi          
 
       # Step 8: Upload APK to GitHub Actions Artifacts (Optional, if you want to store the AABs as artifacts) success() always()
-      - name: Upload APK for flavor ${{ matrix.flavor }}
-        if: matrix.platform == 'android' && success()
-        uses: actions/upload-artifact@v3
-        with:
-          name: "${{ matrix.flavor }}-release-apk"
-          path: "build/app/outputs/flutter-apk/app-${{ matrix.flavor }}-release.apk"
+#      - name: Upload APK for flavor ${{ matrix.flavor }}
+#        if: matrix.platform == 'android' && success()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: "${{ matrix.flavor }}-release-apk"
+#          path: "build/app/outputs/flutter-apk/app-${{ matrix.flavor }}-release.apk"
 
       # Step 9: Upload AAB to GitHub Actions Artifacts (Optional, if you want to store the AABs as artifacts) success() always()
 #      - name: Upload AAB for flavor ${{ matrix.flavor }}
