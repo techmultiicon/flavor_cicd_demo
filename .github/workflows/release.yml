@@ -166,21 +166,17 @@ jobs:
         run: |
           flutter pub get  # Ensure Flutter dependencies are fetched, including the Generated.xcconfig file
 
-      # Step 6: Update Podfile for iOS platform version 11.0
+      # Step 5: Update Podfile for iOS platform version
       - name: Update Podfile for iOS platform version 11.0
         run: |
-          # Check if the Podfile has a platform version, and if not, set it to iOS 11.0
           if ! grep -q "platform :ios, '11.0'" ios/Podfile; then
             sed -i '' "s/platform :ios, '[0-9]*\.[0-9]*'/platform :ios, '11.0'/" ios/Podfile
           fi
-            
-          # Output the Podfile for debugging
-          cat ios/Podfile
 
-      # Step 7: Install iOS dependencies with CocoaPods
-#      - name: Install CocoaPods dependencies
-#        run: |
-#          pod install --repo-update --project-directory=ios  # Run pod install after flutter pub get
+      # Step 6: Install CocoaPods dependencies
+      - name: Install CocoaPods dependencies
+        run: |
+          pod install --repo-update --project-directory=ios
 
       # Step 5: flutter project clean
       - name: Clean project
